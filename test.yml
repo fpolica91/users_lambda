@@ -1,0 +1,53 @@
+service: my-first-sls
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  # iamRoleStatements:
+  #   - Effect: Allow
+  #     Action:
+  #       - dynamodb:*
+  #     Resource: "*"
+  #   - Effect: Allow
+  #     Action:
+  #       - s3:*
+  #     Resource: "*"
+
+functions:
+  generateCertificate:
+    handler: src/functions/handler.handler
+    events:
+      - http:
+          path: /hello
+          method: POST
+          cors: true
+    # iamRoleStatements:
+    #   - Effect: Allow
+    #     Action:
+    #       - dynamodb:Query
+    #       - dynamodb:PutItem
+    #     Resource:
+    #       - "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
+    # iamRoleStatements:
+    #   - Effect: Allow
+    #     Action:
+    #       - dynamodb:Query
+    #     Resource:
+    #       - "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
+
+resources:
+  Resources:
+    dbCertificateUsers:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: users_certificates
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
